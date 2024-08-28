@@ -22,27 +22,25 @@ type HistoryDataInterface interface {
 // ------------------------------------------
 
 // 获取最新的数据(要做增量才可以)
-func GetLatestTickList(history HistoryDataInterface) (map[time.Time][]entity.Quote, map[time.Time][]entity.Quote) {
+func GetLatestTickListFromCSV(gauPath, sauPath string, history HistoryDataInterface, barLength int) (map[time.Time][]entity.Quote, map[time.Time][]entity.Quote) {
 
 	//获取最新的时间刻度
 	nextBarTime := history.GetNextBarTime()
 
 	// 解析数据源
-	gauPath := "/Users/douningbo/Downloads/GAUCNH.csv"
-	sauPath := "/Users/douningbo/Downloads/SAUCNH.csv"
-	gTimeDataMap, _ := parseCSV(gauPath, 5, nextBarTime) //最后一个参数是：查找的最小时间的数据
-	sTimeDataMap, _ := parseCSV(sauPath, 5, nextBarTime) //最后一个参数是：查找的最小时间的数据
+	gTimeDataMap, _ := parseCSV(gauPath, barLength, nextBarTime) //最后一个参数是：查找的最小时间的数据
+	sTimeDataMap, _ := parseCSV(sauPath, barLength, nextBarTime) //最后一个参数是：查找的最小时间的数据
 
 	return gTimeDataMap, sTimeDataMap
 }
 
 // 更新5分钟刻度的码表,插入新的数据
-func UpdateDiffTable(history HistoryDataInterface, gTimeDataMap, sTimeDataMap map[time.Time][]entity.Quote) {
+func UpdateDiffTable(history HistoryDataInterface, barLength int, gTimeDataMap, sTimeDataMap map[time.Time][]entity.Quote) {
 
 	//需要做数据增补. 所以要把所有时间段都涵盖进来
 	minBarTime, maxBarTime := getScope(lo.Keys(gTimeDataMap), lo.Keys(sTimeDataMap))
 
-	for barTime := minBarTime; barTime.Before(maxBarTime) || barTime.Equal(maxBarTime); barTime = barTime.Add(time.Minute * 5) {
+	for barTime := minBarTime; barTime.Before(maxBarTime) || barTime.Equal(maxBarTime); barTime = barTime.Add(time.Minute * time.Duration(barLength)) {
 
 		if lo.HasKey(gTimeDataMap, barTime) && lo.HasKey(gTimeDataMap, barTime) {
 			//2个都有, 那就计算差值
@@ -127,7 +125,7 @@ func getScope(a []time.Time, b []time.Time) (time.Time, time.Time) {
 // key是5min的起点
 // sliceLength : 5分钟一段
 // nextBarTime 所有数据的时间都要晚于或者等于 这个时间
-func parseCSV(filePath string, sliceLength int, nextBarTime time.Time) (map[time.Time][]entity.Quote, error) {
+func parseCSV(filePath string, barLength int, nextBarTime time.Time) (map[time.Time][]entity.Quote, error) {
 
 	result := make(map[time.Time][]entity.Quote, 0)
 
@@ -182,7 +180,7 @@ func parseCSV(filePath string, sliceLength int, nextBarTime time.Time) (map[time
 		}
 
 		//5分钟的起点时间
-		minuteTime := utils.GetSliceStartTime(ctime, sliceLength)
+		minuteTime := utils.GetSliceStartTime(ctime, barLength)
 
 		//只保留小时
 		//hourTime := time.Date(ctime.Year(), ctime.Month(), ctime.Day(), ctime.Hour(), 0, 0, 0, ctime.Location())
