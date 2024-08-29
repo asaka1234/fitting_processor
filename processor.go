@@ -14,7 +14,7 @@ import (
 )
 
 type HistoryDataInterface interface {
-	GetNextBarTime() time.Time
+	GetNextBarTime() *time.Time
 	GetDiffQuoteByBarTime(barTime time.Time) *entity.DiffQuote
 	SaveDiffQuoteByBarTime(barTime time.Time, diffQuote entity.DiffQuote)
 }
@@ -125,7 +125,7 @@ func getScope(a []time.Time, b []time.Time) (time.Time, time.Time) {
 // key是5min的起点
 // sliceLength : 5分钟一段
 // nextBarTime 所有数据的时间都要晚于或者等于 这个时间
-func parseCSV(filePath string, barLength int, nextBarTime time.Time) (map[time.Time][]entity.Quote, error) {
+func parseCSV(filePath string, barLength int, nextBarTime *time.Time) (map[time.Time][]entity.Quote, error) {
 
 	result := make(map[time.Time][]entity.Quote, 0)
 
@@ -174,7 +174,7 @@ func parseCSV(filePath string, barLength int, nextBarTime time.Time) (map[time.T
 			Source:  record[3],
 		}
 
-		if ctime.Before(nextBarTime) {
+		if nextBarTime != nil && ctime.Before(*nextBarTime) {
 			//早期的数据都计算过了, 所以不用再次计算了
 			continue
 		}
