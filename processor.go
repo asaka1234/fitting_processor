@@ -42,29 +42,52 @@ func UpdateDiffTable(history HistoryDataInterface, barLength int, gTimeDataMap, 
 
 	for barTime := minBarTime; barTime.Before(maxBarTime) || barTime.Equal(maxBarTime); barTime = barTime.Add(time.Minute * time.Duration(barLength)) {
 
-		if lo.HasKey(gTimeDataMap, barTime) && lo.HasKey(gTimeDataMap, barTime) {
+		if lo.HasKey(gTimeDataMap, barTime) && lo.HasKey(sTimeDataMap, barTime) {
 			//2个都有, 那就计算差值
+
+			//2024-08-22 22:25:00
+			//if barTime.Format("2006-01-02 15:04:05") != "2024-08-22 22:25:00" {
+			//	continue
+			//}
 
 			//2.1 拿到这一刻度的quote列表
 			gQuoteList := gTimeDataMap[barTime]
 			sQuoteList := sTimeDataMap[barTime]
 
+			//fmt.Printf("--q1-----%d\n", len(gQuoteList))
+			//fmt.Printf("--q2-----%d, %+v, %s\n", len(sQuoteList), sQuoteList, barTime)
+
+			//fmt.Printf("---> raw: %+v\n", gQuoteList)
+
 			//2.2 计算这一刻度的均值
 			gAvgQuote := calculateAveragePrice(barTime, gQuoteList)
 			sAvgQuote := calculateAveragePrice(barTime, sQuoteList)
+			//sAvgQuote := gAvgQuote
+
+			//fmt.Printf("---> cnt: %d,  barTime:%s\n", len(gQuoteList), barTime)
+
+			//fmt.Printf("---> barTime------%+v\n", barTime)
+
+			//fmt.Printf("---> gAvgQuote------%+v\n", gAvgQuote)
+			//fmt.Printf("---> sAvgQuote------%+v\n", sAvgQuote)
 
 			//2.3 计算这一刻度两者的差值(gau-sau)
 			diffQuote := calculateDiffPrice(gAvgQuote, sAvgQuote)
 
+			//fmt.Printf("diffQuote------%+v\n", diffQuote)
+
+			//fmt.Printf("---wsx12w----%+v\n", diffQuote)
 			//2.4 赋值(直接入库合适.便于第一次批量处理)
 			history.SaveDiffQuoteByBarTime(barTime, *diffQuote)
-			fmt.Printf("---%s---%s\n", barTime, *diffQuote)
+			//fmt.Printf("---%s---%s\n", barTime, *diffQuote)
+
+			//os.Exit(1)
 		} else {
 			//查找替换的diff后替换下,找不到就算了.
 			re := searchReplaceBar(history, barTime)
-			if !re.MinuteStartTime.IsZero() {
+			if re != nil && !re.MinuteStartTime.IsZero() {
 				history.SaveDiffQuoteByBarTime(barTime, *re)
-				fmt.Printf("---%s---%s\n", barTime, re)
+				//fmt.Printf("---%s---%s\n", barTime, re)
 			}
 		}
 	}
@@ -84,7 +107,6 @@ func calculateDiffPrice(gauAvg, sauAvg entity.AvgQuote) *entity.DiffQuote {
 	if !sauAvg.MinuteStartTime.Equal(gauAvg.MinuteStartTime) {
 		return nil
 	}
-
 	//2. calculate
 	return &entity.DiffQuote{
 		sauAvg.MinuteStartTime,
@@ -105,6 +127,12 @@ func calculateAveragePrice(startTime time.Time, tickList []entity.Quote) entity.
 
 	avgBid := sumBid.Div(decimal.NewFromInt(int64(len(tickList))))
 	avgAsk := sumAsk.Div(decimal.NewFromInt(int64(len(tickList))))
+
+	//fmt.Printf("-->calculateAveragePrice--%s----sumBid:%+v, len:%d, avgBid:%+v\n", startTime, sumBid, int64(len(tickList)), avgBid)
+	//fmt.Printf("-->calculateAveragePrice--%s----sumAsk:%+v, len:%d, avgAsk:%+v\n", startTime, sumAsk, int64(len(tickList)), avgAsk)
+
+	//fmt.Printf("---sumBid:%s,  cnt:%d, avgBid:%s\n", sumBid, int64(len(tickList)), avgBid)
+	//fmt.Printf("---sumAsk:%s,  cnt:%d, avgAsk:%s\n", sumAsk, int64(len(tickList)), avgAsk)
 
 	//获取这5分钟这一段的平均价格-------
 	return entity.AvgQuote{

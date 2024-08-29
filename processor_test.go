@@ -9,8 +9,9 @@ import (
 type TestHistory struct {
 }
 
-func (aa *TestHistory) GetNextBarTime() time.Time {
-	return time.Now()
+func (aa *TestHistory) GetNextBarTime() *time.Time {
+	re := time.Now()
+	return &re
 }
 
 func (aa *TestHistory) GetDiffQuoteByBarTime(barTime time.Time) *entity.DiffQuote {
