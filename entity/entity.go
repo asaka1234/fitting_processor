@@ -13,12 +13,14 @@ type Quote struct {
 }
 
 type AvgQuote struct {
+	MinuteIndex     int       //5min bar在一个小时内的刻度(0-11)
 	MinuteStartTime time.Time //每一段的起始时间
 	AvgBid          decimal.Decimal
 	AvgAsk          decimal.Decimal
 }
 
 type DiffQuote struct {
+	MinuteIndex     int       //5min bar在一个小时内的刻度(0-11)
 	MinuteStartTime time.Time //每一段的起始时间
 	DiffBid         decimal.Decimal
 	DiffAsk         decimal.Decimal
