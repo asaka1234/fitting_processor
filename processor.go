@@ -14,6 +14,7 @@ import (
 )
 
 type HistoryDataInterface interface {
+	GetMinuteLength() int
 	GetNextBarTime() *time.Time
 	GetDiffQuoteByBarTime(barTime time.Time) *entity.DiffQuote
 	SaveDiffQuoteByBarTime(barTime time.Time, diffQuote entity.DiffQuote)
@@ -22,10 +23,12 @@ type HistoryDataInterface interface {
 // ------------------------------------------
 
 // 获取最新的数据(要做增量才可以)
-func GetLatestTickListFromCSV(gauPath, sauPath string, history HistoryDataInterface, barLength int) (map[time.Time][]entity.Quote, map[time.Time][]entity.Quote) {
+func GetLatestTickListFromCSV(gauPath, sauPath string, history HistoryDataInterface) (map[time.Time][]entity.Quote, map[time.Time][]entity.Quote) {
 
 	//获取最新的时间刻度
 	nextBarTime := history.GetNextBarTime()
+
+	barLength := history.GetMinuteLength()
 
 	// 解析数据源
 	gTimeDataMap, _ := parseCSV(gauPath, barLength, nextBarTime) //最后一个参数是：查找的最小时间的数据
@@ -35,7 +38,9 @@ func GetLatestTickListFromCSV(gauPath, sauPath string, history HistoryDataInterf
 }
 
 // 更新5分钟刻度的码表,插入新的数据
-func UpdateDiffTable(history HistoryDataInterface, barLength int, gTimeDataMap, sTimeDataMap map[time.Time][]entity.Quote) {
+func UpdateDiffTable(history HistoryDataInterface, gTimeDataMap, sTimeDataMap map[time.Time][]entity.Quote) {
+
+	barLength := history.GetMinuteLength()
 
 	//需要做数据增补. 所以要把所有时间段都涵盖进来
 	minBarTime, maxBarTime := getScope(lo.Keys(gTimeDataMap), lo.Keys(sTimeDataMap))
