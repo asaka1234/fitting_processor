@@ -165,7 +165,10 @@ func parseCSV(filePath string, barLength int, nextBarTime *time.Time) (map[time.
 	result := make(map[time.Time][]entity.Quote, 0)
 
 	// Load a csv file.
-	f, _ := os.Open(filePath)
+	f, err1 := os.Open(filePath)
+	if err1 != nil {
+		panic(err1)
+	}
 
 	// Create a new reader.
 	r := csv.NewReader(f)
