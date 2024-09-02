@@ -47,6 +47,10 @@ func UpdateDiffTable(history HistoryDataInterface, gTimeDataMap, sTimeDataMap ma
 
 	for barTime := minBarTime; barTime.Before(maxBarTime) || barTime.Equal(maxBarTime); barTime = barTime.Add(time.Minute * time.Duration(barLength)) {
 
+		//fmt.Printf("----2-----%+v\n", lo.UniqKeys(gTimeDataMap))
+		//fmt.Printf("----3-----%+v\n", lo.UniqKeys(sTimeDataMap))
+		//fmt.Printf("----1-----%+v\n", barTime)
+
 		if lo.HasKey(gTimeDataMap, barTime) && lo.HasKey(sTimeDataMap, barTime) {
 			//2个都有, 那就计算差值
 
@@ -214,7 +218,12 @@ func parseCSV(filePath string, barLength int, nextBarTime *time.Time) (map[time.
 			continue
 		}
 
-		ctime, err := time.Parse("2006.01.02 15:04:05", record[0])
+		gmtLocation, err := time.LoadLocation("UTC")
+		if err != nil {
+			panic(err)
+		}
+		ctime, err := time.ParseInLocation("2006.01.02 15:04:05", record[0], gmtLocation)
+		//ctime, err := time.Parse("2006.01.02 15:04:05", record[0])
 		if err != nil {
 			fmt.Printf("err[%s] data[%s]\n", err.Error(), record[0])
 			continue
@@ -229,6 +238,8 @@ func parseCSV(filePath string, barLength int, nextBarTime *time.Time) (map[time.
 			fmt.Printf("err[%s] data[%s]\n", err.Error(), record[2])
 			continue
 		}
+
+		//fmt.Printf("---%s----bid:%s----ask:%s\n", ctime, bid.String(), ask.String())
 
 		//构造对应的tick
 		tick := entity.Quote{
