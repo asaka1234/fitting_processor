@@ -114,10 +114,32 @@ func calculateDiffPrice(gauAvg, sauAvg entity.AvgQuote, barLength int) *entity.D
 	}
 	//2. calculate
 	return &entity.DiffQuote{
-		sauAvg.MinuteStartTime.Minute() / barLength,
-		sauAvg.MinuteStartTime,
-		gauAvg.AvgBid.Sub(sauAvg.AvgBid),
-		gauAvg.AvgAsk.Sub(sauAvg.AvgAsk),
+		MinuteIndex:     sauAvg.MinuteStartTime.Minute() / barLength,
+		MinuteStartTime: sauAvg.MinuteStartTime,
+
+		BidSumGau:   gauAvg.BidSum,
+		BidCountGau: gauAvg.BidCount,
+		BidAvgGau:   gauAvg.BidAvg,
+
+		BidSumSau:   sauAvg.BidSum,
+		BidCountSau: sauAvg.BidCount,
+		BidAvgSau:   sauAvg.BidAvg,
+
+		BidDiff: gauAvg.BidAvg.Sub(sauAvg.BidAvg),
+		//-------------------------------------------------------------
+
+		AskSumGau:   gauAvg.AskSum,
+		AskCountGau: gauAvg.AskCount,
+		AskAvgGau:   gauAvg.AskAvg,
+
+		AskSumSau:   sauAvg.AskSum,
+		AskCountSau: sauAvg.AskCount,
+		AskAvgSau:   sauAvg.AskAvg,
+
+		AskDiff: gauAvg.AskAvg.Sub(sauAvg.AskAvg),
+
+		//gauAvg.AvgBid.Sub(sauAvg.AvgBid),
+		//gauAvg.AvgAsk.Sub(sauAvg.AvgAsk),
 	}
 }
 
@@ -142,10 +164,14 @@ func calculateAveragePrice(startTime time.Time, tickList []entity.Quote, barLeng
 
 	//获取这5分钟这一段的平均价格-------
 	return entity.AvgQuote{
-		startTime.Minute() / barLength,
-		startTime,
-		avgBid,
-		avgAsk,
+		MinuteIndex:     startTime.Minute() / barLength,
+		MinuteStartTime: startTime,
+		BidSum:          sumBid, //bid
+		BidCount:        len(tickList),
+		BidAvg:          avgBid,
+		AskSum:          sumAsk, //ask
+		AskCount:        len(tickList),
+		AskAvg:          avgAsk,
 	}
 }
 

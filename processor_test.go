@@ -22,18 +22,21 @@ func (aa *TestHistory) SaveDiffQuoteByBarTime(barTime time.Time, diffQuote entit
 
 }
 
+func (aa *TestHistory) GetMinuteLength() int {
+	return 0
+}
+
 //------------------------------------
 
 func TestProcess(t *testing.T) {
 
 	gauPath := "/Users/ccc/Downloads/GAUCNH.csv"
 	sauPath := "/Users/ccc/Downloads/SAUCNH.csv"
-	barLength := 5
 
 	//1. 实现接口
 	ins := &TestHistory{}
 	//2. 获取有效原始数据
-	gTimeDataMap, sTimeDataMap := GetLatestTickListFromCSV(gauPath, sauPath, ins, barLength)
+	gTimeDataMap, sTimeDataMap := GetLatestTickListFromCSV(gauPath, sauPath, ins)
 	//3. 处理数据
-	UpdateDiffTable(nil, barLength, gTimeDataMap, sTimeDataMap)
+	UpdateDiffTable(nil, gTimeDataMap, sTimeDataMap)
 }
