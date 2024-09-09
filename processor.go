@@ -49,10 +49,11 @@ func UpdateDiffTable(history HistoryDataInterface, gTimeDataMap, sTimeDataMap ma
 
 		//fmt.Printf("----2-----%+v\n", lo.UniqKeys(gTimeDataMap))
 		//fmt.Printf("----3-----%+v\n", lo.UniqKeys(sTimeDataMap))
-		//fmt.Printf("----1-----%+v\n", barTime)
+		//fmt.Printf("----3-----\n")
 
 		if lo.HasKey(gTimeDataMap, barTime) && lo.HasKey(sTimeDataMap, barTime) {
 			//2个都有, 那就计算差值
+			//fmt.Printf("----1-----%+v\n", barTime)
 
 			//2024-08-22 22:25:00
 			//if barTime.Format("2006-01-02 15:04:05") != "2024-08-22 22:25:00" {
@@ -129,7 +130,7 @@ func calculateDiffPrice(gauAvg, sauAvg entity.AvgQuote, barLength int) *entity.D
 		BidCountSau: sauAvg.BidCount,
 		BidAvgSau:   sauAvg.BidAvg,
 
-		BidDiff: gauAvg.BidAvg.Sub(sauAvg.BidAvg),
+		BidDiff: gauAvg.BidAvg.Sub(sauAvg.BidAvg).Truncate(2),
 		//-------------------------------------------------------------
 
 		AskSumGau:   gauAvg.AskSum,
@@ -140,7 +141,7 @@ func calculateDiffPrice(gauAvg, sauAvg entity.AvgQuote, barLength int) *entity.D
 		AskCountSau: sauAvg.AskCount,
 		AskAvgSau:   sauAvg.AskAvg,
 
-		AskDiff: gauAvg.AskAvg.Sub(sauAvg.AskAvg),
+		AskDiff: gauAvg.AskAvg.Sub(sauAvg.AskAvg).Truncate(2),
 
 		//gauAvg.AvgBid.Sub(sauAvg.AvgBid),
 		//gauAvg.AvgAsk.Sub(sauAvg.AvgAsk),
@@ -157,8 +158,8 @@ func calculateAveragePrice(startTime time.Time, tickList []entity.Quote, barLeng
 		sumAsk = sumAsk.Add(item.Ask)
 	}
 
-	avgBid := sumBid.Div(decimal.NewFromInt(int64(len(tickList))))
-	avgAsk := sumAsk.Div(decimal.NewFromInt(int64(len(tickList))))
+	avgBid := sumBid.Div(decimal.NewFromInt(int64(len(tickList)))).Truncate(2)
+	avgAsk := sumAsk.Div(decimal.NewFromInt(int64(len(tickList)))).Truncate(2)
 
 	//fmt.Printf("-->calculateAveragePrice--%s----sumBid:%+v, len:%d, avgBid:%+v\n", startTime, sumBid, int64(len(tickList)), avgBid)
 	//fmt.Printf("-->calculateAveragePrice--%s----sumAsk:%+v, len:%d, avgAsk:%+v\n", startTime, sumAsk, int64(len(tickList)), avgAsk)
@@ -244,8 +245,8 @@ func parseCSV(filePath string, barLength int, nextBarTime *time.Time) (map[time.
 		//构造对应的tick
 		tick := entity.Quote{
 			CurTime: ctime,
-			Bid:     bid,
-			Ask:     ask,
+			Bid:     bid.Truncate(2),
+			Ask:     ask.Truncate(2),
 			Source:  record[3],
 		}
 
