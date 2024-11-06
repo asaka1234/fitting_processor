@@ -70,8 +70,8 @@ func UpdateDiffTable(history HistoryDataInterface, gTimeDataMap, sTimeDataMap ma
 			//fmt.Printf("---> raw: %+v\n", gQuoteList)
 
 			//2.2 计算这一刻度的均值
-			gAvgQuote := calculateAveragePrice(barTime, gQuoteList, barLength)
-			sAvgQuote := calculateAveragePrice(barTime, sQuoteList, barLength)
+			gAvgQuote := CalculateAveragePrice(barTime, gQuoteList, barLength)
+			sAvgQuote := CalculateAveragePrice(barTime, sQuoteList, barLength)
 			//sAvgQuote := gAvgQuote
 
 			//fmt.Printf("---> cnt: %d,  barTime:%s\n", len(gQuoteList), barTime)
@@ -82,7 +82,7 @@ func UpdateDiffTable(history HistoryDataInterface, gTimeDataMap, sTimeDataMap ma
 			//fmt.Printf("---> sAvgQuote------%+v\n", sAvgQuote)
 
 			//2.3 计算这一刻度两者的差值(gau-sau)
-			diffQuote := calculateDiffPrice(gAvgQuote, sAvgQuote, barLength)
+			diffQuote := CalculateDiffPrice(gAvgQuote, sAvgQuote, barLength)
 
 			//fmt.Printf("diffQuote------%+v\n", diffQuote)
 
@@ -112,7 +112,7 @@ func searchReplaceBar(history HistoryDataInterface, missTime time.Time) *entity.
 }
 
 // 计算两边指定hour内的：各个slice的价差
-func calculateDiffPrice(gauAvg, sauAvg entity.AvgQuote, barLength int) *entity.DiffQuote {
+func CalculateDiffPrice(gauAvg, sauAvg entity.AvgQuote, barLength int) *entity.DiffQuote {
 	//1. param check
 	if !sauAvg.MinuteStartTime.Equal(gauAvg.MinuteStartTime) {
 		return nil
@@ -149,7 +149,7 @@ func calculateDiffPrice(gauAvg, sauAvg entity.AvgQuote, barLength int) *entity.D
 }
 
 // 计算每一段的平均值
-func calculateAveragePrice(startTime time.Time, tickList []entity.Quote, barLength int) entity.AvgQuote {
+func CalculateAveragePrice(startTime time.Time, tickList []entity.Quote, barLength int) entity.AvgQuote {
 
 	sumBid := decimal.Zero
 	sumAsk := decimal.Zero
