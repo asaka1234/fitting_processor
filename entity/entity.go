@@ -11,6 +11,8 @@ type Quote struct {
 	Bid     decimal.Decimal
 	Ask     decimal.Decimal
 	Source  string //来源
+	//-------------------------------------------
+	Symbol string
 }
 
 type AvgQuote struct {
@@ -24,6 +26,8 @@ type AvgQuote struct {
 	AskSum   decimal.Decimal
 	AskCount int
 	AskAvg   decimal.Decimal
+	//-------------------------------------------
+	Symbol string
 }
 
 type DiffQuote struct {
@@ -50,4 +54,6 @@ type DiffQuote struct {
 	AskAvgSau   decimal.Decimal
 	//-------------------------------------------
 	AskDiff decimal.Decimal
+	//-------------------------------------------
+	Symbol string
 }
